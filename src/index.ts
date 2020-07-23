@@ -1,10 +1,14 @@
 import './style.css';
 import * as THREE from 'three';
 import * as PIXI from 'pixi.js';
+import Player from './assets/components/Player';
+import { Texture } from 'three';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
+
+var playerModel: THREE.Group;
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -30,12 +34,13 @@ const material = new THREE.MeshBasicMaterial({
 });
 
 // create a box and add it to the scene
-const box = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), material);
+const LoadModel = async (): Promise<void> => {
+  playerModel = await Player.LoadPlayerModel();
+  const texture: Texture = await Player.LoadPlayerTexture();
+  const material = new THREE.MeshBasicMaterial({ map: texture });
+  scene.add(playerModel)
+}
 
-scene.add(box);
-
-box.position.x = 0.5;
-box.rotation.y = 0.5;
 
 camera.position.x = 5;
 camera.position.y = 5;
@@ -50,9 +55,11 @@ function animate(): void {
 
 function render(): void {
   const timer = 0.002 * Date.now();
-  box.position.y = 0.5 + 0.5 * Math.sin(timer);
-  box.rotation.x += 0.1;
+  playerModel.translateY(0.01);
   renderer.render(scene, camera);
 }
-
-animate();
+const Main = async (): Promise<void> => {
+  await LoadModel();
+  animate();
+}
+Main();

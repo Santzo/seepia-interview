@@ -1,5 +1,4 @@
 const { resolve } = require('path');
-
 const { CheckerPlugin } = require('awesome-typescript-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
@@ -38,6 +37,19 @@ module.exports = {
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.(glb|gltf)$/,
+        use:
+          [
+            {
+              loader: 'file-loader',
+              options:
+              {
+                outputPath: 'assets/models/'
+              }
+            }
+          ]
       },
     ],
   },

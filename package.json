@@ -22,6 +22,7 @@
   "devDependencies": {
     "awesome-typescript-loader": "latest",
     "css-loader": "latest",
+    "file-loader": "^6.0.0",
     "html-webpack-plugin": "latest",
     "progress-bar-webpack-plugin": "latest",
     "style-loader": "latest",
