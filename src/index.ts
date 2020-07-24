@@ -1,65 +1,81 @@
 import './style.css';
 import * as THREE from 'three';
 import * as PIXI from 'pixi.js';
-import Player from './assets/components/Player';
-import { Texture } from 'three';
+
+import Loader from './assets/components/Loader';
+import Player, { PlayerAnimations } from './assets/components/Player';
+
+import { Texture, Mesh } from 'three';
+
+const ninjaModel = require('./assets/models/cibus_ninja.glb');
+const ninjaTexture = require('./assets/images/ninja.png');
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
+// const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 1, 1000);
 
-var playerModel: THREE.Group;
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setClearColor(0x000000);
+renderer.setPixelRatio(window.devicePixelRatio);
 
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-const axis = new THREE.AxesHelper(10);
+const light = new THREE.AmbientLight(0xffffff, 0.65);
+scene.add(light);
+const light3 = new THREE.DirectionalLight(0xffffff, 1.45);
+scene.add(light3);
 
+const material = new THREE.MeshLambertMaterial({ color: 0xf3ffe2 });
+const box = new THREE.BoxGeometry(1, 1, 1);
+const cube = new THREE.Mesh(box, material);
+scene.add(cube);
+
+const clock = new THREE.Clock();
+var player: Player;
+
+
+
+window.onresize = () => renderer.setSize(window.innerWidth * 0.975, window.innerHeight * 0.95);
+
+renderer.setSize(window.innerWidth * 0.975, window.innerHeight * 0.95);
+const canvasHolder = document.querySelector('.canvas-holder');
+canvasHolder.appendChild(renderer.domElement);
+const axis = new THREE.AxesHelper(-10);
 scene.add(axis);
 
-const light = new THREE.DirectionalLight(0xffffff, 1.0);
+const InitializePlayer = async (): Promise<void> => {
+  const model = await Loader.LoadModel(ninjaModel.default);
+  const texture: Texture = await Loader.LoadTexture(ninjaTexture.default);
+  player = new Player(model.scene, model.animations, new THREE.AnimationMixer(model.scene));
+  Loader.ApplyMaterialToGroup(player.model, texture);
 
-light.position.set(100, 100, 100);
-
-scene.add(light);
-
-const light2 = new THREE.DirectionalLight(0xffffff, 1.0);
-
-light2.position.set(-100, 100, -100);
-
-scene.add(light2);
-
-const material = new THREE.MeshBasicMaterial({
-  color: 'rgb(255,0,125)',
-  wireframe: true,
-});
-
-// create a box and add it to the scene
-const LoadModel = async (): Promise<void> => {
-  playerModel = await Player.LoadPlayerModel();
-  const texture: Texture = await Player.LoadPlayerTexture();
-  const material = new THREE.MeshBasicMaterial({ map: texture });
-  scene.add(playerModel)
+  document.addEventListener('keydown', player.handleKeyPress);
+  document.addEventListener('keyup', player.handleKeyPress);
+  scene.add(player.model);
 }
 
 
-camera.position.x = 5;
-camera.position.y = 5;
-camera.position.z = 5;
+camera.position.x = -12;
+camera.position.y = 1;
+camera.position.z = 0;
 
-camera.lookAt(scene.position);
 
-function animate(): void {
-  requestAnimationFrame(animate);
+
+
+const render = (): void => {
+  requestAnimationFrame(render);
+  const deltaTime = clock.getDelta();
+  if (player) {
+    player.mixer.update(deltaTime);
+    player.handleMovement(deltaTime);
+  }
+  cube.rotateY(deltaTime);
+  cube.rotateX(deltaTime);
+  renderer.render(scene, camera);
+}
+
+const StartGame = async (): Promise<void> => {
+  await InitializePlayer();
+  camera.lookAt(player.model.position);
   render();
 }
 
-function render(): void {
-  const timer = 0.002 * Date.now();
-  playerModel.translateY(0.01);
-  renderer.render(scene, camera);
-}
-const Main = async (): Promise<void> => {
-  await LoadModel();
-  animate();
-}
-Main();
+StartGame();

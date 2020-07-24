@@ -2,6 +2,23 @@
 
 html,
 body {
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
+  background-color: #0c0c0c;
+  display: flex;
+}
+.canvas-holder{
+  display:flex;
+  max-width:97.75vw;
+  max-height:95.25vh;
+  align-self: center;
+  justify-self: center;
+  margin-top: 2.5vh;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  border: 2px solid#444;
+  border-radius: 8px;
+}
+canvas{
 }
