@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 
-
-export default class Loader {
+// A helper class to make some loading methods async, and also a helper function to apply a material
+// to multiple meshes.
+export default abstract class Loader {
 
     static LoadModel = (address: string): Promise<GLTF> => {
         return new Promise((resolve, reject) => {

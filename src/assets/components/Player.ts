@@ -1,80 +1,147 @@
 import * as THREE from 'three';
+import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
+import Events from '../../Events';
+import { Vector2 } from 'three';
 
 export default class Player {
     model: THREE.Group;
     animations: THREE.AnimationClip[];
     mixer: THREE.AnimationMixer;
+    animationAction: THREE.AnimationAction;
     moveSpeed: number;
-    movement: Movement = {
-        LEFT: false,
-        RIGHT: false,
-        JUMP: false,
-        ATTACK: false,
+    defaultAnimation: PlayerAnimations;
+    jumpStartPosY: number; jumpEndPosY: number; jumpSmoother: number; jumpHeight: number; jumpSpeed: number = 5;
+    isGrounded: boolean;
+    goingUp: boolean;
+    boundaries: Vector2;
+
+    playerAction: PlayerAction = {
+        left: false,
+        right: false,
+        jump: false,
+        attack: false,
     };
     keypress: KeyPress = {
-        LEFT: ['ArrowLeft', 'a'],
-        RIGHT: ['ArrowRight', 'd'],
-        JUMP: [''],
-        ATTACK: ['Enter']
+        left: ['A', 'ArrowLeft'],
+        right: ['D', 'ArrowRight'],
+        jump: ['Space', ' '],
+        attack: ['Enter']
     }
 
-    constructor(model: THREE.Group, animations: THREE.AnimationClip[], mixer: THREE.AnimationMixer) {
-        this.model = model;
-        this.animations = animations;
-        this.mixer = mixer;
-        this.mixer.addEventListener('finished', e => console.log('finished'));
-        this.playAnimation(PlayerAnimations.IDLE);
+    constructor(model: GLTF) {
+        this.model = model.scene;
+        this.animations = model.animations;
+        this.mixer = new THREE.AnimationMixer(model.scene);
+        this.defaultAnimation = PlayerAnimations.IDLE;
+        this.isGrounded = true;
+        this.playAnimation(this.defaultAnimation);
+        this.boundaries = new Vector2(8, 8);
+        this.jumpSmoother = 0.08; this.jumpHeight = 2.8;
+
+        this.mixer.addEventListener('finished', e => {
+            this.playAnimation(this.defaultAnimation);
+            if (this.playerAction.attack) this.playerAction.attack = false;
+        });
         this.moveSpeed = 2.5;
-        console.log(this.movement.ATTACK);
     }
+
     playAnimation = (animation: PlayerAnimations, playOnce = false) => {
-        const action = this.mixer.clipAction(this.animations[animation]).play();
-        action.reset();
-        action.loop = !playOnce ? THREE.LoopRepeat : THREE.LoopOnce;
+        if (this.animationAction) this.animationAction.stop();
+        this.animationAction = this.mixer.clipAction(this.animations[animation]).play();
+        this.animationAction.loop = playOnce ? THREE.LoopOnce : THREE.LoopRepeat;
+    }
+
+    handleMovement = (deltaTime: number): void => {
+        if (this.playerAction.attack) return;
+        let movement = 0;
+        let moveAmount = this.moveSpeed * deltaTime;
+
+        if (this.playerAction.left) movement -= moveAmount
+        if (this.playerAction.right) movement += moveAmount;
+
+        if (movement != 0) {
+            const sign = Math.sign(movement);
+            this.model.scale.setZ(sign);
+
+            if (sign > 0 && this.model.position.z < this.boundaries.x ||
+                sign < 0 && this.model.position.z > -this.boundaries.x) {
+                this.model.position.z += movement;
+            }
+            else {
+                Events.Emit('onScreenEdge', new Vector2(moveAmount * sign, 0 * sign));
+            }
+        }
+
+        if (this.playerAction.jump) this.handleJump(deltaTime)
+    }
+
+    handleJump = (deltaTime: number): void => {
+        if (this.goingUp && this.model.position.y >= this.jumpEndPosY - this.jumpSmoother) {
+            this.goingUp = false;
+        } else if (!this.goingUp && this.model.position.y <= this.jumpStartPosY + this.jumpSmoother) {
+            this.isGrounded = true;
+            this.playerAction.jump = false;
+            this.model.position.y = this.jumpStartPosY;
+            return;
+        }
+        const target = this.goingUp ? this.jumpEndPosY : this.jumpStartPosY
+        const jumpForce = this.goingUp ? (target - this.model.position.y) * this.jumpSpeed * deltaTime :
+            ((-this.jumpHeight - 0.3 - (target - this.model.position.y)) * this.jumpSpeed * deltaTime);
+        this.model.position.y += jumpForce;
     }
 
     handleKeyPress = (event): void => {
-        switch (event.key) {
-            case (this.keypress.LEFT[0]):
-            case (this.keypress.LEFT[1]):
-                this.movement.LEFT = event.type === "keydown";
+        const key = event.key.length > 1 ? event.key : event.key.toUpperCase();
+        switch (key) {
+            case (this.keypress.left[0]):
+            case (this.keypress.left[1]):
+                this.playerAction.left = event.type === "keydown";
                 break;
-            case (this.keypress.RIGHT[0]):
-            case (this.keypress.RIGHT[1]):
-                this.movement.RIGHT = event.type === "keydown";
+            case (this.keypress.right[0]):
+            case (this.keypress.right[1]):
+                this.playerAction.right = event.type === "keydown";
                 break;
-            case (this.keypress.ATTACK[0]):
-            case (this.keypress.ATTACK[1]):
-                this.playAnimation(PlayerAnimations.ATTACK, true);
+            case (this.keypress.attack[0]):
+            case (this.keypress.attack[1]):
+                if (event.type === "keydown") {
+                    if (this.jumpingOrAttacking) break;
+                    this.playerAction.attack = true;
+                    this.playAnimation(PlayerAnimations.ATTACK, true);
+                }
+                break;
+            case (this.keypress.jump[0]):
+            case (this.keypress.jump[1]):
+                if (event.type === "keydown") {
+                    if (this.jumpingOrAttacking || !this.isGrounded) break;
+                    this.isGrounded = false;
+                    this.goingUp = true;
+                    this.jumpStartPosY = this.model.position.y;
+                    this.jumpEndPosY = this.model.position.y + this.jumpHeight;
+                    this.playerAction.jump = true;
+                    this.playAnimation(PlayerAnimations.DEFEND, true);
+                }
                 break;
         }
     }
-    handleMovement = (deltaTime: number): void => {
-        let movement = 0;
-        let moveAmount = this.moveSpeed * deltaTime;
-        if (this.movement.LEFT) movement -= moveAmount
-        if (this.movement.RIGHT) movement += moveAmount;
-        if (movement != 0)
-            this.model.scale.setZ(Math.sign(movement));
-        this.model.position.z += movement;
-    }
+    get jumpingOrAttacking(): boolean { return this.playerAction.jump || this.playerAction.attack };
+
 }
-export enum PlayerAnimations {
+enum PlayerAnimations {
     ATTACK,
     BRAG,
     DEFEND,
     HIT,
     IDLE
 }
-interface Movement {
-    LEFT: boolean;
-    RIGHT: boolean;
-    JUMP: boolean;
-    ATTACK: boolean;
+interface PlayerAction {
+    left: boolean;
+    right: boolean;
+    jump: boolean;
+    attack: boolean;
 }
 interface KeyPress {
-    LEFT: string[];
-    RIGHT: string[];
-    JUMP: string[];
-    ATTACK: string[];
+    left: string[];
+    right: string[];
+    jump: string[];
+    attack: string[];
 }

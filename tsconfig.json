@@ -22,5 +22,8 @@
     "buildOnSave": false,
     "atom": {
         "rewriteTsconfig": false
-    }
+    },
+    "files": [
+        "src/Extensions.d.ts"
+    ]
 }

@@ -8,17 +8,16 @@ body {
   display: flex;
 }
 .canvas-holder{
-  display:flex;
-  max-width:97.75vw;
-  max-height:95.25vh;
-  align-self: center;
-  justify-self: center;
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  max-width:97.5vw;
+  max-height: calc(97.5vw * 0.5625 * 0.875);
   margin-top: 2.5vh;
-  justify-content: center;
-  align-content: center;
-  align-items: center;
+  margin-left: 1.125vw;
   border: 2px solid#444;
   border-radius: 8px;
 }
-canvas{
-}
+
