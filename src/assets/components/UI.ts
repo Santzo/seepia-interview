@@ -16,7 +16,15 @@ export default class UI {
 
     }
     addText = (text: string, color: number, fontSize: number, x: number, y: number, align = "center", bold = false): PIXI.Text => {
-        const element = new PIXI.Text(text, { fontFamily: 'Arial', fontSize: fontSize, fill: color, align: align, dropShadow: true, dropShadowDistance: 1, fontWeight: bold ? "bold" : "normal" });
+        const element = new PIXI.Text(text,
+            {
+                fontFamily: 'Arial',
+                fontSize: fontSize, fill:
+                    color, align: align,
+                dropShadow: true,
+                dropShadowDistance: 2,
+                fontWeight: bold ? "bold" : "normal",
+            });
         element.anchor.set(0, 0);
         this.app.stage.addChild(element);
         element.x = x;

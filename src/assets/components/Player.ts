@@ -51,7 +51,7 @@ export default class Player {
         this.animationAction.loop = playOnce ? THREE.LoopOnce : THREE.LoopRepeat;
     }
 
-    handleMovement = (deltaTime: number): void => {
+    handleMovement = (deltaTime: number, camPos: number): void => {
         if (this.playerAction.attack) return;
         let movement = 0;
         let moveAmount = this.moveSpeed * deltaTime;
@@ -62,13 +62,13 @@ export default class Player {
         if (movement != 0) {
             const sign = Math.sign(movement);
             this.model.scale.setZ(sign);
-
-            if (sign > 0 && this.model.position.z < this.boundaries.x ||
-                sign < 0 && this.model.position.z > -this.boundaries.x) {
+            const playerPos = this.model.position.z - camPos;
+            const movePlayer = sign > 0 && playerPos < this.boundaries.x || sign < 0 && playerPos > -this.boundaries.x
+            if (movePlayer) {
                 this.model.position.z += movement;
             }
             else {
-                Events.Emit('onScreenEdge', new Vector2(moveAmount * sign, 0 * sign));
+                Events.Emit('onScreenEdge', { model: this.model.position, x: moveAmount * sign, y: 0 * sign });
             }
         }
 

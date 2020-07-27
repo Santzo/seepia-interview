@@ -5,6 +5,7 @@ import Player from './assets/components/Player';
 import Loader from './assets/components/Loader';
 import Background from './assets/components/Background';
 import UI from './assets/components/UI';
+import Events from './Events';
 
 const extensions = require('./Extensions.ts');
 const ninjaModel = require('./assets/models/cibus_ninja.glb');
@@ -102,13 +103,12 @@ const render = (): void => {
   const deltaTime = clock.getDelta();
   if (player) {
     player.mixer.update(deltaTime);
-    player.handleMovement(deltaTime);
+    player.handleMovement(deltaTime, camera.position.z);
   }
   cube.rotateY(deltaTime);
   cube.rotateX(deltaTime);
   renderer.render(scene, camera);
 }
-
 
 // Start Application
 
@@ -126,3 +126,4 @@ camera.position.z = 0;
 
 InitPixiAPP();
 StartGame();
+export { camera };

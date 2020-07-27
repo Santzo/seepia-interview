@@ -11,8 +11,14 @@ export default class Events extends EventEmitter {
     }
     static Emit = (onEvent: EventType, args: EventArgs) => { Events.emitter.emit(onEvent, args) };
 }
-type EventArgs = Vector2;
+type EventArgs = ScreenEdge;
 type EventType = 'onScreenEdge' | 'onChangeHealth';
+
+export interface ScreenEdge {
+    model: THREE.Vector3;
+    x: number;
+    y: number;
+}
 
 
 
