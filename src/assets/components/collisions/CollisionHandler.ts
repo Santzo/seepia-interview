@@ -18,7 +18,7 @@ export default abstract class CollisionHandler {
         const index = CollisionHandler.colliders.findIndex(col => col.object == object);
         CollisionHandler.colliders.splice(index, 1);
     }
-    // Check collisions
+    // Check for collisions
     static checkCollision = (min: THREE.Vector3, max: THREE.Vector3): CollisionInfo[] => {
 
         let collidedWith: CollisionInfo[] = new Array();

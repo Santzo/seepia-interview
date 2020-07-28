@@ -32,8 +32,6 @@ const light2 = new THREE.DirectionalLight(0xffffff, 1.45);
 scene.add(light2);
 
 
-
-
 const clock = new THREE.Clock();
 var player: Player; var background: Background; var ui: UI;
 var backgroundPixi: PIXI.Application; var uiPixi: PIXI.Application;
@@ -152,14 +150,17 @@ const render = (): void => {
 
   renderer.render(scene, camera);
 }
+
+// Function to destroy the collected collectible and also remove it from the 
+// colliders and collectibles array
 const destroyCollectible = (args: CollectibleArgs) => {
   scene.remove(args.collectible.mesh);
   const index = collectibles.findIndex(col => col == args.collectible)
   collectibles.splice(index, 1);
   CollisionHandler.removeCollider(args.collectible);
 }
-// Start Application
 
+// Start Application
 const StartGame = async (): Promise<void> => {
   SetCanvasZIndex(renderer.domElement, 1);
   await InitializePlayer();
@@ -173,8 +174,6 @@ const StartGame = async (): Promise<void> => {
   camera.lookAt(player.model.position);
   render();
 }
-
-
 
 InitPixiAPP();
 StartGame();

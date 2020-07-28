@@ -5,6 +5,7 @@ import { Vector2, Vector3 } from 'three';
 import Collider from './collisions/Collider';
 import CollisionHandler, { CollisionInfo } from './collisions/CollisionHandler';
 
+// The base player class to handle everything related to the player
 export default class Player {
     model: THREE.Group;
     animations: THREE.AnimationClip[];

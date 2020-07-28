@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Vector2 } from 'three';
 import LevelObject from './LevelObject';
 
-// Collectible object extending the base class
+// Collectible object extending the LevelObject base class
 export default class Collectible extends LevelObject {
     mesh: THREE.Mesh;
     constructor(x: number, y: number) {
