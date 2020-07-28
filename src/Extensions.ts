@@ -1,3 +1,4 @@
+// A few extension methods for the Math class, didnt even end up using lerp
 interface Math {
     lerp: (from: number, to: number, value: number) => number
     clamp: (value: number, min: number, max: number) => number

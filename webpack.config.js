@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
 
   entry: './src/index.ts',
   output: {
