@@ -4,7 +4,7 @@ import LevelObject from './LevelObject';
 
 // Collectible object extending the LevelObject base class
 export default class Collectible extends LevelObject {
-    mesh: THREE.Mesh;
+
     constructor(x: number, y: number) {
         super(x, y);
         const collectible = new THREE.SphereGeometry(0.3);

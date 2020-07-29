@@ -4,8 +4,9 @@ import LevelObject from './LevelObject';
 
 // Collectible object extending the LevelObject base class
 export default class Platform extends LevelObject {
+
     sizeX: number; sizeY: number
-    mesh: THREE.Mesh;
+
     constructor(x: number, y: number, sizeX: number, sizeY: number, color?: number) {
         super(x, y);
         this.sizeX = sizeX;

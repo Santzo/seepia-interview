@@ -8,13 +8,5 @@ export default abstract class LevelObject {
     constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
-
-        const collectible = new THREE.SphereGeometry(0.3);
-        const material = new THREE.MeshStandardMaterial({ color: 0xffdf00 });
-        this.mesh = new THREE.Mesh(collectible, material);
-
-        this.mesh.position.x = 0;
-        this.mesh.position.y = y;
-        this.mesh.position.z = x;
     }
-} 
+}
